@@ -1,0 +1,77 @@
+# =============================================================================
+# KIRA configuration
+# -----------------------------------------------------------------------------
+# Every value below is the built-in default. Edit to override.
+# Relative paths resolve against this file's directory.
+# =============================================================================
+
+audio:
+  # input_device: null          # null = system default; int index or name substring
+  # output_device: null
+  sample_rate: 16000
+  channels: 1
+  block_ms: 40
+  wake_prebuffer_s: 1.5
+  vad_threshold: 0.5
+  vad_min_silence_s: 0.7
+  vad_min_speech_s: 0.25
+  listen_timeout_s: 8.0
+  echo_cancel: true
+  tts_sample_rate: 24000
+
+wake:
+  enabled: true
+  # model_path: null            # .onnx; null = bundled pretrained model
+  sensitivity: 0.5
+  detection_threshold: 0.5
+  min_score: 0.25
+  language_model: en_US
+  rearm_silence_s: 1.2
+
+stt:
+  enabled: true
+  model: base.en                # tiny.en base.en small.en medium.en large-v3
+  device: auto                  # auto | cpu | cuda | rocm | metal
+  compute_type: auto            # auto | int8 | int8_float16 | float16 | float32
+  beam_size: 1
+  vad_filter: true
+  language: en
+
+tts:
+  engine: kokoro                # kokoro | edge
+  kokoro_voice: af_heart
+  kokoro_model: kokoro-v1.0
+  speed: 1.0
+  edge_voice: en-US-AriaNeural
+  rate: '+0%'
+  pitch: '+0Hz'
+  fallback_to_edge: true
+  stream: true
+
+llm:
+  server_url: http://127.0.0.1:1234/v1
+  model: qwen2.5-7b-instruct
+  temperature: 0.4
+  top_p: 0.9
+  max_tokens: 512
+  stream: true
+  timeout_s: 60.0
+  # api_key: lm-studio
+
+agent:
+  assistant_name: KIRA
+  max_context_tokens: 4096
+  summary_trigger_tokens: 3200
+  keep_recent_messages: 12
+  max_turns_per_request: 4
+  tool_timeout_s: 30.0
+  max_tool_result_chars: 4000
+  report_tool_results: true
+
+logging:
+  dir: ./logs
+  level: INFO
+  max_bytes: 5242880
+  backup_count: 3
+  console: true
+  latency: true

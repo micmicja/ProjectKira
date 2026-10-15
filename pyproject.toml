@@ -1,0 +1,77 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "kira"
+version = "0.1.0"
+description = "KIRA — a low-latency, privacy-first local voice assistant and agent."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "ProjectKira" }]
+keywords = ["assistant", "voice", "local-llm", "pyqt", "agent"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: X11 Applications :: Qt",
+    "Intended Audience :: End Users/Desktop",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Multimedia :: Sound/Audio :: Speech",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "PyQt6>=6.7,<7",
+    "numpy>=1.26",
+    "PyYAML>=6.0",
+    "openai>=1.50",
+    "sounddevice>=0.4",
+]
+
+[project.optional-dependencies]
+voice = [
+    "openwakeword>=0.6",
+    "faster-whisper>=1.0",
+    "edge-tts>=7.0",
+    "torch>=2.2",
+]
+kokoro = ["kokoro-onnx"]
+dev = ["pytest>=8", "pytest-qt", "ruff>=0.5"]
+
+[project.scripts]
+kira = "kira:main"
+
+[project.urls]
+Homepage = "https://github.com/ProjectKira/kira"
+Issues = "https://github.com/ProjectKira/kira/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["core", "ui"]
+
+[tool.hatch.build.targets.sdist]
+include = ["core", "ui", "kira.py", "requirements.txt", "README.md", "data/kira.yaml"]
+
+[tool.ruff]
+line-length = 104
+target-version = "py311"
+extend-exclude = [".venv", "data"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF"]
+ignore = [
+    "B008",   # PyQt6 enum calls are conventionally unparenthesised at call sites
+    "E731",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"kira.py" = ["E402"]  # sys.path bootstrap precedes project imports
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = [
+    "slow: exercises the real audio or LLM stack",
+    "gui: needs a display and PyQt6",
+]

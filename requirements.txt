@@ -1,0 +1,24 @@
+# KIRA core. Required for the assistant to run at all.
+PyQt6>=6.7,<7
+numpy>=1.26
+PyYAML>=6.0
+openai>=1.50
+sounddevice>=0.4
+
+# Voice pipeline. Each stage lazy-imports its dependency, so KIRA still runs
+# text-only without these — install them for hands-free use.
+openwakeword>=0.6
+faster-whisper>=1.0
+edge-tts>=7.0
+
+# Kokoro is large and version-sensitive; install separately for local TTS:
+#   pip install kokoro-onnx
+# It downloads a ~350MB model on first use.
+
+# Torch is needed by openwakeword and silero VAD. On a CUDA machine use:
+#   pip install torch --index-url https://download.pytorch.org/whl/cu121
+# Otherwise the CPU wheel is fine:
+torch>=2.2
+
+# Note: ffmpeg on PATH is required by faster-whisper for any input it cannot
+# decode itself. On Windows:  winget install ffmpeg
