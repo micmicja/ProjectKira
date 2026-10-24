@@ -10,6 +10,7 @@ sounddevice>=0.4
 openwakeword>=0.6
 faster-whisper>=1.0
 edge-tts>=7.0
+pygame>=2.5
 
 # Kokoro is large and version-sensitive; install separately for local TTS:
 #   pip install kokoro-onnx

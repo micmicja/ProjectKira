@@ -98,13 +98,13 @@ class STTSettings:
 
 @dataclass(slots=True)
 class TTSSettings:
-    """Kokoro primary, Edge-TTS fallback (network)."""
+    """Edge-TTS primary (network-based, no local CPU load)."""
 
-    engine: str = "kokoro"  # kokoro | edge
+    engine: str = "edge"  # kokoro | edge
     kokoro_voice: str = "af_heart"
     kokoro_model: str = "kokoro-v1.0"
     speed: float = 1.0
-    edge_voice: str = "en-US-AriaNeural"  # Fallback when Kokoro is unavailable.
+    edge_voice: str = "en-US-ChristopherNeural"  # Professional male J.A.R.V.I.S. tone
     rate: str = "+0%"
     pitch: str = "+0Hz"
     fallback_to_edge: bool = True
@@ -116,15 +116,15 @@ class TTSSettings:
 class LLMSettings:
     """OpenAI-compatible endpoint: LM Studio, llama.cpp server, vLLM, Ollama."""
 
-    server_url: str = "http://127.0.0.1:1234/v1"
-    model: str = "qwen2.5-7b-instruct"
+    server_url: str = "http://127.0.0.1:11434/v1"
+    model: str = "llama3.2:3b"
     # Deliberately low: local instruct models beat their defaults at very low temp.
     temperature: float = 0.4
     top_p: float = 0.9
     max_tokens: int = 512
     stream: bool = True
     timeout_s: float = 60.0
-    api_key: str = "lm-studio"  # Local servers ignore it; the SDK requires one.
+    api_key: str = "ollama"  # Local servers ignore it; the SDK requires one.
     # Extra body fields sent with every request — for server knobs the OpenAI SDK
     # does not expose, e.g. {"chat_template_kwargs": {"reasoning_effort": "low"}}.
     extra_body: dict = field(default_factory=dict)
@@ -557,14 +557,14 @@ tts:
   stream: true
 
 llm:
-  server_url: http://127.0.0.1:1234/v1
-  model: qwen2.5-7b-instruct
+  server_url: http://127.0.0.1:11434/v1
+  model: llama3.2:3b
   temperature: 0.4
   top_p: 0.9
   max_tokens: 512
   stream: true
   timeout_s: 60.0
-  # api_key: lm-studio
+  # api_key: ollama
 
 agent:
   assistant_name: KIRA

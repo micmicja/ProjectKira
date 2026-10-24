@@ -6,7 +6,7 @@ KIRA is a privacy-first, low-latency voice assistant for Windows that runs entir
 - Silero VAD for speech activity detection
 - Faster-Whisper for speech-to-text transcription
 - Kokoro-TTS with Edge-TTS fallback for text-to-speech
-- Local OpenAI-compatible LLM inference (qwen2.5-7b-instruct)
+- Local OpenAI-compatible LLM inference (llama3.2:3b)
 
 ## Installation
 

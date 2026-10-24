@@ -51,9 +51,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Path to a config YAML (default: data/kira.yaml, created if missing).",
     )
     parser.add_argument("--server", dest="override_server_url", default=None,
-                        help="Override the LLM endpoint, e.g. http://127.0.0.1:1234/v1")
+                        help="Override the LLM endpoint, e.g. http://127.0.0.1:11434/v1")
     parser.add_argument("--model", dest="override_model", default=None,
-                        help="Override the model identifier sent to the LLM server")
+                        help="Override the model identifier, e.g. llama3.2:3b")
     parser.add_argument("--mic", dest="override_input_device", default=None,
                         help="Capture device: index or name substring")
     parser.add_argument("--speaker", dest="override_output_device", default=None,

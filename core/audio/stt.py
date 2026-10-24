@@ -18,9 +18,9 @@ from core.log import get_logger
 log = get_logger(__name__)
 
 # Supported model sizes and their approximate VRAM usage
-MODEL_SIZES = ("tiny", "base", "small", "medium", "large-v1", "large-v2", "large-v3")
+MODEL_SIZES = ("tiny.en", "base.en", "small.en", "medium.en", "large-v1", "large-v2", "large-v3", "tiny", "base", "small", "medium")
 # Compute types: float16 (GPU), int8 (CPU), float32 (CPU)
-COMPUTE_TYPES = ("float16", "int8", "float32")
+COMPUTE_TYPES = ("float16", "int8", "float32", "int8_float16")
 
 
 @dataclass(slots=True)

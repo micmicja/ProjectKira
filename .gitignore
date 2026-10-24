@@ -10,6 +10,8 @@ dist/
 data/logs/
 data/memory.json
 data/audio_devices.json
+data/*.json.bak
+data/data/
 *.log
 
 # Local models are large and should never be committed.

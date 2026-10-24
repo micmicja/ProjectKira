@@ -150,7 +150,7 @@ class LLMClient:
                 ) from exc
             self._client = OpenAI(
                 base_url=self.settings.server_url.rstrip("/"),
-                api_key=self.settings.api_key or "lm-studio",
+                api_key=self.settings.api_key or "ollama",
                 timeout=self.settings.timeout_s,
                 max_retries=0,  # We retry and report latency ourselves.
             )
@@ -315,20 +315,63 @@ class LLMClient:
         model = ""
 
         for chunk in stream:
+            # Extract model name
             if getattr(chunk, "model", ""):
                 model = str(chunk.model)
-            if not getattr(chunk, "choices", None):
+
+            # Bulletproof choice extraction for OpenAI/NVIDIA format
+            try:
+                choices = None
+                if hasattr(chunk, 'choices') and chunk.choices:
+                    choices = chunk.choices
+                elif isinstance(chunk, dict) and 'choices' in chunk:
+                    choices = chunk['choices']
+
+                if not choices or len(choices) == 0:
+                    continue
+
+                choice = choices[0]
+
+                # Extract finish reason
+                if hasattr(choice, 'finish_reason') and choice.finish_reason:
+                    finish_reason = str(choice.finish_reason)
+                elif isinstance(choice, dict) and choice.get('finish_reason'):
+                    finish_reason = str(choice['finish_reason'])
+
+                # Extract delta content
+                delta = None
+                if hasattr(choice, 'delta'):
+                    delta = choice.delta
+                elif isinstance(choice, dict) and 'delta' in choice:
+                    delta = choice['delta']
+
+                if delta:
+                    # Extract content
+                    content = None
+                    if hasattr(delta, 'content') and delta.content is not None:
+                        content = delta.content
+                    elif isinstance(delta, dict) and delta.get('content') is not None:
+                        content = delta['content']
+
+                    if content:
+                        parts.append(content)
+                        if on_chunk is not None:
+                            _safe_chunk(on_chunk, content)
+
+                    # Extract tool calls
+                    tool_calls = None
+                    if hasattr(delta, 'tool_calls'):
+                        tool_calls = delta.tool_calls
+                    elif isinstance(delta, dict) and 'tool_calls' in delta:
+                        tool_calls = delta['tool_calls']
+
+                    if tool_calls:
+                        for tc in tool_calls:
+                            _accumulate_tool(tool_state, tc)
+            except (AttributeError, KeyError, IndexError, TypeError) as parse_err:
+                # Log parse errors but continue streaming
+                log.debug(f"Chunk parse error: {parse_err}")
                 continue
-            choice = chunk.choices[0]
-            if getattr(choice, "finish_reason", None):
-                finish_reason = str(choice.finish_reason)
-            piece = getattr(choice.delta, "content", None)
-            if piece:
-                parts.append(piece)
-                if on_chunk is not None:
-                    _safe_chunk(on_chunk, piece)
-            for tc in getattr(choice.delta, "tool_calls", None) or []:
-                _accumulate_tool(tool_state, tc)
 
         elapsed = time.perf_counter() - started
         result = Completion(
@@ -369,11 +412,31 @@ class LLMClient:
             try:
                 stream = self.client.chat.completions.create(messages=normalized, **params)
                 for chunk in stream:
-                    if not getattr(chunk, "choices", None):
+                    # Bulletproof extraction for OpenAI/NVIDIA format
+                    try:
+                        # Handle both Pydantic objects and raw dictionaries
+                        content = None
+
+                        if hasattr(chunk, 'choices') and chunk.choices:
+                            # Pydantic object format (OpenAI SDK)
+                            if len(chunk.choices) > 0:
+                                delta = chunk.choices[0].delta
+                                if hasattr(delta, 'content') and delta.content is not None:
+                                    content = delta.content
+                        elif isinstance(chunk, dict):
+                            # Raw dictionary format (fallback)
+                            choices = chunk.get('choices', [])
+                            if choices and len(choices) > 0:
+                                delta = choices[0].get('delta', {})
+                                content = delta.get('content')
+
+                        if content:
+                            queue.append(content)
+                    except (AttributeError, KeyError, IndexError) as parse_err:
+                        # Log parse errors but continue streaming
+                        import logging
+                        logging.getLogger(__name__).debug(f"Chunk parse error: {parse_err}")
                         continue
-                    piece = getattr(chunk.choices[0].delta, "content", None)
-                    if piece:
-                        queue.append(piece)
             except BaseException as exc:  # noqa: BLE001
                 error.append(exc)
             finally:
@@ -521,7 +584,8 @@ def _wrap(exc: Exception, server_url: str) -> LLMError:
     if "connection" in lowered or "refused" in lowered or "unreachable" in lowered:
         return LLMError(
             f"Cannot reach the LLM server at {server_url}. "
-            "Start LM Studio (Developer tab -> Start Server), or pass --server <url>."
+            "If it is Ollama, run `ollama serve` and `ollama pull llama3.2:3b` first, "
+            "or pass --server <url> for a different endpoint."
         )
     if "timed out" in lowered or "timeout" in lowered:
         return LLMError(f"LLM request timed out at {server_url}")

@@ -38,25 +38,26 @@ stt:
   language: en
 
 tts:
-  engine: kokoro                # kokoro | edge
+  engine: edge                  # kokoro | edge (edge = network-based, offloads CPU)
   kokoro_voice: af_heart
   kokoro_model: kokoro-v1.0
   speed: 1.0
-  edge_voice: en-US-AriaNeural
+  edge_voice: en-US-ChristopherNeural  # Professional male J.A.R.V.I.S. voice
   rate: '+0%'
   pitch: '+0Hz'
   fallback_to_edge: true
   stream: true
 
 llm:
-  server_url: http://127.0.0.1:1234/v1
-  model: qwen2.5-7b-instruct
+  api_key: "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"
+  server_url: "https://api.groq.com/openai/v1"
+  model: "openai/gpt-oss-20b"
   temperature: 0.4
   top_p: 0.9
-  max_tokens: 512
+  max_tokens: 100
   stream: true
   timeout_s: 60.0
-  # api_key: lm-studio
+  # api_key: ollama
 
 agent:
   assistant_name: KIRA
